@@ -27,7 +27,8 @@ class User extends Authenticatable
         'rate',
         'rateCount',
         'isActive',
-        'isDrivingLicenseVerified'
+        'isDrivingLicenseVerified',
+        'gender'
     ];
 
     public function carpoolTripsAsDriver()

@@ -20,6 +20,7 @@ class CarPoolTripBookingDto
     public string $status;
     public int $totalSeats;
     public bool $canComment;
+    public string $gender;
 
     // Constructor to initialize the DTO
     public function __construct(
@@ -37,6 +38,7 @@ class CarPoolTripBookingDto
         string $passengerFullName,
         string $status,
         int $totalSeats,
+        string $gender,
         bool $canComment = false
     ) {
         $this->id = $id;
@@ -54,5 +56,6 @@ class CarPoolTripBookingDto
         $this->driverFullName = $driverFullName;
         $this->totalSeats = $totalSeats;
         $this->canComment = $canComment;
+        $this->gender = $gender;
     }
 }

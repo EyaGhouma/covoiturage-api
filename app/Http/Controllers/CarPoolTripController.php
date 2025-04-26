@@ -27,14 +27,14 @@ class CarPoolTripController extends Controller
             ->when($request->filled('date'), function ($q) use ($request) {
                 $selectedDate = Carbon::parse($request->date)->startOfDay();
                 $today = now()->startOfDay();
-            
+
                 $q->whereDate('date', $selectedDate->toDateString());
-            
+
                 // Si la date est aujourd'hui, on vérifie aussi l'heure
                 if ($selectedDate->equalTo($today)) {
                     $q->whereTime('date', '>=', now()->format('H:i:s'));
                 }
-            
+
                 return $q;
             })
             ->orderBy('date', 'asc')
@@ -61,7 +61,8 @@ class CarPoolTripController extends Controller
                 smokingAllowed: $trip->smokingAllowed,
                 driverFullName: trim(($trip->driver->firstName ?? '') . ' ' . ($trip->driver->lastName ?? '')),
                 rate: $trip->driver->rate ?? 0,
-                duration: $trip->duration
+                duration: $trip->duration,
+                driverGender: $trip->driver->gender
             );
         });
 
@@ -78,6 +79,12 @@ class CarPoolTripController extends Controller
         $minutes = ($carpoolTrip->duration - $hours) * 60;
 
         $end = $start->copy()->addHours($hours)->addMinutes($minutes);
+        $passengers = $carpoolTrip->passengers->map(function ($passenger) {
+            return [
+                'fullName' => trim(($passenger->firstName ?? '') . ' ' . ($passenger->lastName ?? '')),
+                'gender' => $passenger->gender,
+            ];
+        })->toArray();
         $dto = new CarPoolTripDto(
             id: $carpoolTrip->id,
             user_id: $carpoolTrip->user_id,
@@ -90,11 +97,11 @@ class CarPoolTripController extends Controller
             petsAllowed: $carpoolTrip->petsAllowed,
             smokingAllowed: $carpoolTrip->smokingAllowed,
             driverFullName: trim(($carpoolTrip->driver->firstName ?? '') . ' ' . ($carpoolTrip->driver->lastName ?? '')),
-            passengersFullName: $carpoolTrip->passengers->map(function ($passenger) {
-                return trim(($passenger->firstName ?? '') . ' ' . ($passenger->lastName ?? ''));
-            })->toArray(),
+            passengers: $passengers,
             rate: $carpoolTrip->driver->rate ?? 0,
-            duration: $carpoolTrip->duration
+            duration: $carpoolTrip->duration,
+            driverGender:$carpoolTrip->driver->gender
+
         );
 
         // Return the transformed DTOs as JSON
@@ -173,7 +180,8 @@ class CarPoolTripController extends Controller
                 status: $booking->status,
                 totalSeats: $booking->total_seats,
                 driverFullName: trim(($trip->driver->firstName ?? '') . ' ' . ($trip->driver->lastName ?? '')),
-                passengerFullName: trim(($booking->passenger->firstName ?? '') . ' ' . ($booking->passenger->lastName ?? ''))
+                passengerFullName: trim(($booking->passenger->firstName ?? '') . ' ' . ($booking->passenger->lastName ?? '')),
+                gender:$booking->passenger->gender
             );
         });
 
@@ -213,7 +221,8 @@ class CarPoolTripController extends Controller
                 totalSeats: $booking->total_seats,
                 driverFullName: trim(($booking->driver->firstName ?? '') . ' ' . ($booking->driver->lastName ?? '')),
                 passengerFullName: trim(($booking->passenger->firstName ?? '') . ' ' . ($booking->passenger->lastName ?? '')),
-                canComment: $canComment
+                canComment: $canComment,
+                gender: $booking->driver->gender
             );
         });
         return response()->json($dtos);

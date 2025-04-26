@@ -21,7 +21,8 @@ class AuthController extends Controller
             'password' => 'required|string|min:8',
             'rate' => 'numeric',
             'isActive' => 'boolean',
-            'isDrivingLicenseVerified'=> 'boolean'
+            'isDrivingLicenseVerified'=> 'boolean',
+            'gender'=> 'string'
         ]);
 
         $user = User::create([
@@ -34,9 +35,10 @@ class AuthController extends Controller
             'isActive' => $request->isActive,
             'isDrivingLicenseVerified' => $request->isDrivingLicenseVerified,
             'password' => Hash::make($request->password),
-            'rateCount' => 0
+            'rateCount' => 0,
+            'gender' => $request->gender
         ]);
-        return response()->json(['message' => 'User registered successfully!'], 201);
+        return response()->json(['message' => 'Utilisateur enregistré avec succès !'], 201);
     }
 
     // Méthode de connexion
@@ -48,19 +50,19 @@ class AuthController extends Controller
         ]);
 
         if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json(['message' => 'Informations d’identification non valides'], 401);
         }
 
         $user = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
-        return response()->json(['message' => 'Login successful!', 'token' => $token, 'user' => $user]);
+        return response()->json(['message' => 'Connexion réussie!', 'token' => $token, 'user' => $user]);
     }
 
     // Méthode de déconnexion
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();
-        return response()->json(['message' => 'Logout successful!']);
+        return response()->json(['message' => 'Fermeture de session réussie!']);
     }
 
     public function verifyDrivingLicense($id)
@@ -68,7 +70,7 @@ class AuthController extends Controller
         $user = User::find($id);
         $user->isDrivingLicenseVerified = true;
         $user->save();
-        return response()->json(['message' => 'permis vérifié avec succès', 'user' => $user]);
+        return response()->json(['message' => 'Permis vérifié avec succès', 'user' => $user]);
     }
 
     public function getUserWithComments($userId)
@@ -88,6 +90,7 @@ class AuthController extends Controller
         'rate' => $user->rate,
         'rateCount' => $user->rateCount,
         'isDrivingLicenseVerified' => $user->isDrivingLicenseVerified,
+        'gender'=>$user->gender,
         'comments' => $user->noticesAsDriver->map(function ($notice) {
             return [
                 'comment' => $notice->comment,

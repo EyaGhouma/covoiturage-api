@@ -17,7 +17,8 @@ class CarPoolTripDto
     public bool $smokingAllowed;
     public string $driverFullName;
     public float $rate;
-    public ?array $passengersFullName;
+    public string $driverGender;
+    public ?array $passengers;
     public ?float $duration;
 
 
@@ -36,7 +37,8 @@ class CarPoolTripDto
         string $driverFullName,
         float $rate,
         float $duration,
-        array $passengersFullName = []
+        string $driverGender,
+        array $passengers = []
     ) {
         $this->id = $id;
         $this->user_id = $user_id;
@@ -50,7 +52,8 @@ class CarPoolTripDto
         $this->smokingAllowed = $smokingAllowed;
         $this->driverFullName = $driverFullName;
         $this->rate = $rate;
-        $this->passengersFullName = $passengersFullName;
+        $this->passengers = $passengers;
         $this->duration = $duration;
+        $this->driverGender = $driverGender;
     }
 }
